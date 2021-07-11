@@ -4,6 +4,27 @@ from riotwatcher import LolWatcher, ApiError
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+from PIL import Image
+import requests
+from io import BytesIO
+
+def showimage(champname):
+    url = image_dict[champname]
+    response = requests.get(url)
+    img = Image.open(BytesIO(response.content))
+    img.show()
+
+
+def testimage():
+    randchampname = random.choice(list(lore_dict.keys()))
+    showimage(randchampname)
+
+    answer = input("guess the champ:")
+    if answer.lower() == randchampname.lower():
+        print('correct')
+    else:
+        print('incorrect. answer is ', randchampname)
+
 
 def testability():
     randchampname = random.choice(list(lore_dict.keys()))
@@ -34,12 +55,15 @@ my_matches = lol_watcher.match.matchlist_by_account(my_region, me['accountId'])
 latest = lol_watcher.data_dragon.versions_for_region(my_region)['n']['champion']
 # Lets get some champions static information
 static_champ_list = lol_watcher.data_dragon.champions(latest, True, 'en_US')
+static_item_list = lol_watcher.data_dragon.items(latest)
+
 #print(static_champ_list)
 
 # build champid : champname map
 champ_dict = {}
 lore_dict = {}
-ability_dict={}
+ability_dict = {}
+image_dict={}
 for key in static_champ_list['data']:
     row = static_champ_list['data'][key]
     champ_dict[int(row['key'])] = row['id']
@@ -53,10 +77,19 @@ for key in static_champ_list['data']:
 #build champname:[Qname,Wname,Ename,Rname] map
 for key in static_champ_list['data']:
     row = static_champ_list['data'][key]
-    ability_list =[row['spells'][0]['name'],row['spells'][1]['name'],row['spells'][2]['name'],row['spells'][3]['name']]
-    ability_dict[key]= ability_list
+    ability_list = [row['spells'][0]['name'],row['spells'][1]['name'],row['spells'][2]['name'],row['spells'][3]['name']]
+    ability_dict[key] = ability_list
 
-#print(ability_dict)
+for key in static_champ_list['data']:
+    row = static_champ_list['data'][key]
+    image_dict[key] = 'http://ddragon.leagueoflegends.com/cdn/img/champion/splash/'+key+'_0.jpg'
+
+
+
+
+
+
+
 #print(blurb_dict)
 my_matches = lol_watcher.match.matchlist_by_account(my_region, me['accountId'])
 
@@ -80,13 +113,14 @@ for matchnum in range(10,12):
 while True:
     testability()
     testlore()
+    testimage()
     keep_running = input("Another? (y/n): ")
-    if keep_running=='n':
+    if keep_running =='n':
         break
 '''
 todo:
 fix kogmaw vs kog'maw
-fix nunu vs nunuand willlump
+fix nunu vs nunu and willlump
 fix mundo vs drmundo
 fix master yi vs masteryi vs yi
 '''
