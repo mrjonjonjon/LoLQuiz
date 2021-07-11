@@ -5,10 +5,23 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 
+def testability():
+    randchampname = random.choice(list(lore_dict.keys()))
+    print(ability_dict[randchampname][random.choice([0, 1, 2, 3])])
+    answer = input("guess the champ:")
+    if answer.lower() == randchampname.lower():
+        print('correct')
+    else:
+        print('incorrect. answer is ', randchampname)
 
-
-
-
+def testlore():
+    randchampname = random.choice(list(lore_dict.keys()))
+    print(lore_dict[randchampname])
+    answer = input("guess the champ:")
+    if answer.lower() == randchampname.lower():
+        print('correct')
+    else:
+        print('incorrect. answer is ', randchampname)
 
 lol_watcher = LolWatcher('RGAPI-6046f816-35c0-4de2-a7f0-c463dc877804')
 my_region = 'na1'
@@ -20,11 +33,13 @@ my_matches = lol_watcher.match.matchlist_by_account(my_region, me['accountId'])
 # check league's latest version
 latest = lol_watcher.data_dragon.versions_for_region(my_region)['n']['champion']
 # Lets get some champions static information
-static_champ_list = lol_watcher.data_dragon.champions(latest, False, 'en_US')
+static_champ_list = lol_watcher.data_dragon.champions(latest, True, 'en_US')
+#print(static_champ_list)
 
 # build champid : champname map
 champ_dict = {}
-blurb_dict={}
+lore_dict = {}
+ability_dict={}
 for key in static_champ_list['data']:
     row = static_champ_list['data'][key]
     champ_dict[int(row['key'])] = row['id']
@@ -33,8 +48,15 @@ for key in static_champ_list['data']:
 
 for key in static_champ_list['data']:
     row = static_champ_list['data'][key]
-    blurb_dict[key] = row['blurb'].replace(key,'???')
+    lore_dict[key] = row['lore'].replace(key,'???')
 
+#build champname:[Qname,Wname,Ename,Rname] map
+for key in static_champ_list['data']:
+    row = static_champ_list['data'][key]
+    ability_list =[row['spells'][0]['name'],row['spells'][1]['name'],row['spells'][2]['name'],row['spells'][3]['name']]
+    ability_dict[key]= ability_list
+
+#print(ability_dict)
 #print(blurb_dict)
 my_matches = lol_watcher.match.matchlist_by_account(my_region, me['accountId'])
 
@@ -56,14 +78,8 @@ for matchnum in range(10,12):
                 break
 '''
 while True:
-    randchampname=random.choice(list(blurb_dict.keys()))
-    print(blurb_dict[randchampname])
-    answer=input("guess the champ:")
-    if answer.lower()==randchampname.lower():
-        print('correct')
-    else:
-        print('incorrect. answer is ',randchampname)
-
+    testability()
+    testlore()
     keep_running = input("Another? (y/n): ")
     if keep_running=='n':
         break
@@ -72,4 +88,5 @@ todo:
 fix kogmaw vs kog'maw
 fix nunu vs nunuand willlump
 fix mundo vs drmundo
+fix master yi vs masteryi vs yi
 '''
